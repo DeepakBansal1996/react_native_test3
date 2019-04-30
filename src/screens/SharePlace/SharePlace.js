@@ -1,11 +1,12 @@
 import React,{Component} from 'react';
-import {View,Button,StyleSheet,ScrollView} from 'react-native';
+import {Button,StyleSheet,ScrollView,KeyboardAvoidingView} from 'react-native';
 import {connect} from 'react-redux';
 import PlaceInput from '../../component/PlaceInput/PlaceInput';
 import MainText from '../../component/UI/MainText/MainText';
 import HeadingText from '../../component/UI/HeadingText/HeadingText';
 import PickImage from '../../component/PickImage/PickImage';
 import PickLocation from '../../component/PickLocation/PickLocation';
+import validate from '../../utility/validation';
 
 
 import { addPlace } from '../../store/actions/index';
@@ -18,7 +19,16 @@ class SharePlaceScreen extends Component {
         navBarButtonColor:"orange"
     }
     state={
-        placeName:""
+        controls: {
+            placeName: {
+                value: "",
+                valid: false,
+                touched: false,
+                validationRules: {
+                    notEmpty: true
+                }
+            }
+        }
     };
     constructor(props){
         super(props);
@@ -34,33 +44,45 @@ class SharePlaceScreen extends Component {
         }
     }
     placeNameChangeHandler = (val) =>{
-        this.setState({
-           placeName:val
+        this.setState(prevState =>{
+            return {
+               controls: {
+                   ...prevState,
+                   placeName: {
+                       ...prevState.controls.placeName,
+                       value: val,
+                       valid: validate(val, prevState.controls.placeName.validationRules),
+                       touched: true
+
+                   }
+               } 
+            }
         });
     }
     placeAddedHandler = () =>{
-        if(this.state.placeName.trim()!==""){
-            this.props.onAddPlace(this.state.placeName);
+        if(this.state.controls.placeName.value.trim() !== ""){
+            this.props.onAddPlace(this.state.controls.placeName.value);
         }
     };
     render(){
         return(
             <ScrollView>
-                <View style={styles.container}>
+                <KeyboardAvoidingView style={styles.container} behavior="padding" >
                    <MainText>
                        <HeadingText>Share a Place with us!</HeadingText>
                     </MainText> 
                    <PickImage />
                    <PickLocation />
                    <PlaceInput 
-                       placeName={this.state.placeName} 
+                       placeData={this.state.controls.placeName} 
                        onChangeText={this.placeNameChangeHandler} 
                     />
                    <Button 
                        title="Share the Place!" 
-                       onPress={this.placeAddedHandler} 
+                       onPress={this.placeAddedHandler}
+                       disabled = {!this.state.controls.placeName.valid} 
                      />
-                </View>
+                </KeyboardAvoidingView>
             </ScrollView>
         );
     }

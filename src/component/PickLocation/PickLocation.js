@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {View,Button,StyleSheet,Text} from 'react-native';
+import MapView from 'react-native-maps';
 
 class PickLocation extends Component {
     render(){
